@@ -8,5 +8,7 @@ import java.util.List;
 public interface CurrencyConverter {
 	MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency);
 
+	MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency, final String userType);
+
 	List<MoneyAmount> convert(final MoneyAmount moneyAmount, final List<Currency> targetCurrencies);
 }
