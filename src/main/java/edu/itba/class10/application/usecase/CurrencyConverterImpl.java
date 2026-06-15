@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +23,17 @@ public class CurrencyConverterImpl implements CurrencyConverter {
 	private final ExchangeRateProvider exchangeRateProvider;
 	private final ExchangePersistence exchangePersistence;
 
+	// cache para no pegarle siempre a la api y que las conversiones vayan mas rapido
+	private static final Map<String, MoneyAmount> CACHE = new HashMap<>();
+
 	public MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency) {
+		final String key = moneyAmount.currency() + "" + moneyAmount.amount() + "" + toCurrency;
+		if (CACHE.containsKey(key)) {
+			return CACHE.get(key);
+		}
 		final var result = this.convert(moneyAmount, List.of(toCurrency)).getFirst();
 		this.exchangePersistence.save(this.createSingleConversionEntity(moneyAmount, result));
+		CACHE.put(key, result);
 		return result;
 	}
 
