@@ -1,31 +1,46 @@
 package edu.itba.class10.domain.entity.money;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
-@Getter
-@EqualsAndHashCode
+@Data
 @Accessors(fluent = true)
-@ToString
+@Entity
+@Table(name = "money_amount")
 public class MoneyAmount {
-	private final Currency currency;
-	private final BigDecimal amount;
 
-	private MoneyAmount(final Currency currency, final BigDecimal amount) {
-		this.currency = currency;
-		this.amount = amount.setScale(2, RoundingMode.HALF_UP);
-	}
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Enumerated(EnumType.STRING)
+	@Column
+	private Currency currency;
+
+	@Column
+	private BigDecimal amount;
 
 	public static MoneyAmount create(final Currency currency, final double amount) {
-		return new MoneyAmount(currency, BigDecimal.valueOf(amount));
+		final MoneyAmount moneyAmount = new MoneyAmount();
+		moneyAmount.setCurrency(currency);
+		moneyAmount.setAmount(BigDecimal.valueOf(amount));
+		return moneyAmount;
 	}
 
-	public static MoneyAmount create(Currency currency, BigDecimal amount) {
-		return new MoneyAmount(currency, amount);
+	public static MoneyAmount create(final Currency currency, final BigDecimal amount) {
+		final MoneyAmount moneyAmount = new MoneyAmount();
+		moneyAmount.setCurrency(currency);
+		moneyAmount.setAmount(amount);
+		return moneyAmount;
 	}
 }
