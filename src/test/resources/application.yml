@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: Exchange
+logging:
+  level:
+    root: INFO

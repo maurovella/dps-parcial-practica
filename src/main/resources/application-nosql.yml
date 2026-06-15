@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      database: exchange_dev
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.2

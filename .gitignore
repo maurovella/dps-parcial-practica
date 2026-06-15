@@ -1,0 +1,7 @@
+target/
+.idea/
+.vscode/
+*.class
+.DS_Store
+# Material de práctica del parcial (no se publica)
+.parcial/

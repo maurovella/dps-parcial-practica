@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: exchange
+  profiles:
+    active: local
+server:
+  port: 8080
+  servlet:
+    context-path: /api    
+logging:
+  level:
+    root: INFO
+    edu.itba.class10: DEBUG
+exchange-api:
+  http-providers:
+    - name: free-currency
+      api-key: ${EXCHANGE_API_KEY}
+      base-url: https://api.freecurrencyapi.com/v1/latest

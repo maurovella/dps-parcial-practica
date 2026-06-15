@@ -1,0 +1,28 @@
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    edu.itba.class12: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.config: DEBUG
+
+    root: INFO
+
+exchange-api:
+  http-providers:
+    - name: free-currency
+      api-key: fca_live_tMQ4oYRmk8T587mrTdOFbTREYXjqCLRkXwJUS4C6
+      base-url: https://api.freecurrencyapi.com/v1/latest
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,refresh"

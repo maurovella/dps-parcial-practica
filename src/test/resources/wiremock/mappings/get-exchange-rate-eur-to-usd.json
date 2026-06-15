@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": ".*",
+    "queryParameters": {
+      "base_currency": { "equalTo": "EUR" },
+      "currencies": { "equalTo": "USD" }
+    },
+    "headers": {
+      "apikey": { "equalTo": "dummyApiKey" },
+      "accept": { "equalTo": "application/json" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "one_currency_response.json"
+  }
+}
+
