@@ -1,5 +1,7 @@
 package edu.itba.class10.application.usecase;
 
+import edu.itba.class10.application.FixerExchangeRateProvider;
+import edu.itba.class10.application.HttpExchangeRateProvider;
 import edu.itba.class10.domain.entity.money.Currency;
 import edu.itba.class10.domain.entity.money.MoneyAmount;
 import edu.itba.class10.domain.model.LatestExchangeRateRequest;
@@ -7,7 +9,6 @@ import edu.itba.class10.domain.persistence.ExchangePersistence;
 import edu.itba.class10.domain.persistence.SingleConversionEntity;
 import edu.itba.class10.domain.provider.ExchangeRateProvider;
 import edu.itba.class10.domain.usecases.exchangerate.CurrencyConverter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,10 +17,27 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class CurrencyConverterImpl implements CurrencyConverter {
-	private final ExchangeRateProvider exchangeRateProvider;
+	private final List<ExchangeRateProvider> providers;
 	private final ExchangePersistence exchangePersistence;
+
+	public CurrencyConverterImpl(final List<ExchangeRateProvider> providers,
+			final ExchangePersistence exchangePersistence) {
+		this.providers = providers;
+		this.exchangePersistence = exchangePersistence;
+	}
+
+	private ExchangeRateProvider resolveProvider() {
+		final String providerName = System.getenv().getOrDefault("EXCHANGE_PROVIDER", "currencyapi");
+		for (final ExchangeRateProvider p : this.providers) {
+			if (providerName.equals("fixer") && p instanceof FixerExchangeRateProvider) {
+				return p;
+			} else if (providerName.equals("currencyapi") && p instanceof HttpExchangeRateProvider) {
+				return p;
+			}
+		}
+		throw new IllegalStateException("No hay proveedor configurado para " + providerName);
+	}
 
 	public MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency) {
 		final var result = this.convert(moneyAmount, List.of(toCurrency)).getFirst();
@@ -36,7 +54,7 @@ public class CurrencyConverterImpl implements CurrencyConverter {
 			return Collections.emptyList();
 		}
 
-		final var exchangeRates = this.exchangeRateProvider.getExchangeRate(LatestExchangeRateRequest.builder()
+		final var exchangeRates = this.resolveProvider().getExchangeRate(LatestExchangeRateRequest.builder()
 				.baseCurrency(moneyAmount.currency()).targetCurrencies(targetCurrencies).build());
 		return targetCurrencies.stream().map(toCurrency -> this.makeConversion(exchangeRates.getExchange(toCurrency),
 				moneyAmount.amount(), toCurrency)).toList();
