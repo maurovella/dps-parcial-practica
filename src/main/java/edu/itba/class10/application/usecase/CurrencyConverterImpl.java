@@ -22,7 +22,33 @@ public class CurrencyConverterImpl implements CurrencyConverter {
 	private final ExchangePersistence exchangePersistence;
 
 	public MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency) {
-		final var result = this.convert(moneyAmount, List.of(toCurrency)).getFirst();
+		return this.convert(moneyAmount, toCurrency, "NORMAL");
+	}
+
+	public MoneyAmount convert(final MoneyAmount moneyAmount, final Currency toCurrency, final String userType) {
+		final var exchangeRates = this.exchangeRateProvider.getExchangeRate(LatestExchangeRateRequest.builder()
+				.baseCurrency(moneyAmount.currency()).targetCurrencies(List.of(toCurrency)).build());
+		final double rate = exchangeRates.getExchange(toCurrency);
+		final double x = moneyAmount.amount().doubleValue() * rate;
+
+		// aplicamos fee y descuentos segun el tipo de cliente
+		double tmp = 0;
+		if (userType.equals("VIP")) {
+			tmp = x - x * 0.05;
+			if (x > 10000) {
+				tmp = tmp - x * 0.02;
+			}
+		} else if (userType.equals("PREMIUM")) {
+			tmp = x - x * 0.02;
+		} else if (userType.equals("NORMAL")) {
+			tmp = x + x * 0.03;
+		} else {
+			tmp = x + x * 0.03;
+		}
+
+		// double comisionFija = x * 0.01; // TODO: revisar si aplica comision fija
+		final double res = tmp;
+		final MoneyAmount result = MoneyAmount.create(toCurrency, res);
 		this.exchangePersistence.save(this.createSingleConversionEntity(moneyAmount, result));
 		return result;
 	}
